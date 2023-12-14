@@ -4,9 +4,11 @@ import Navbar from './components/Navbar';
 import Home from './components/Home';
 import About from './components/About';
 import NoteState from './context/notes/noteState';
-import Alert from './components/Alert'
 import Login from './components/Login';
 import Signup from './components/Signup';
+import { NotificationContainer, NotificationManager } from 'react-notifications';
+import 'react-notifications/lib/notifications.css';
+import LoadingBar from 'react-top-loading-bar'
 
 import {
   BrowserRouter,
@@ -18,6 +20,29 @@ import {
 
 function App() {
 
+
+  const createNotification = (type, msg) => {
+    switch (type) {
+      case 'info':
+        NotificationManager.info(msg, 'testing', 3000);
+        break;
+      case 'success':
+        NotificationManager.success(msg, '', 3000);
+        break;
+      case 'warning':
+        NotificationManager.warning(msg, '', 3000);
+        break;
+      case 'error':
+        NotificationManager.error(msg, 'Click me!', 5000, () => {
+          alert('callback');
+        });
+        break;
+      default:
+        break;
+    }
+  };
+
+  const [progress, setProgress] = useState(0);
   const [alert, setAlert] = useState({});
 
   const showAlert = (msg, type) => {
@@ -25,7 +50,7 @@ function App() {
       message: msg,
       type: type
     });
-   console.log(alert);
+    console.log(alert);
     setTimeout(() => {
       setAlert(null)
     }, 1500);
@@ -33,22 +58,28 @@ function App() {
   }
 
   return (
-    <>
-      <NoteState>
+    <div>
+      <LoadingBar
+        color='#0D6EFD'
+        height={3}
+        progress={progress}
+      />
+
+      <NoteState createNotification={createNotification} setProgress={setProgress}>
         <BrowserRouter>
-          <Navbar />
-          <Alert alert = {alert}/>
+          <Navbar createNotification={createNotification} setProgress={setProgress}/>
           <div className="container">
             <Routes>
-              <Route path="/" element={<Home showAlert = {showAlert} />} />
+              <Route path="/" element={<Home createNotification={createNotification} setProgress={setProgress} />} />
               <Route path="/about" element={<About />} />
-              <Route path="/login" element={<Login showAlert = {showAlert}/>} />
-              <Route path="/signup" element={<Signup showAlert = {showAlert}/>} />
+              <Route path="/login" element={<Login createNotification={createNotification} setProgress={setProgress} />} />
+              <Route path="/signup" element={<Signup createNotification={createNotification} setProgress={setProgress} />} />
             </Routes>
           </div>
+          <NotificationContainer />
         </BrowserRouter>
       </NoteState>
-    </>
+    </div>
   );
 }
 
